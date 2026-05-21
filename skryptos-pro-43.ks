@@ -10,13 +10,19 @@ lang en_US.UTF-8
 network  --bootproto=dhcp --device=link --activate
 # Shutdown after installation
 shutdown
+
+# SkryptOS-Pro Custom Repositories
+repo --name="skryptos-pro" --baseurl=https://SakuraSkrypt.github.io/SkryptOS-Pro/repos/x86_64/ --cost=97
+
+# Standard Nobara Repositories
 repo --name="nobara" --baseurl=https://usw.nobaraproject.org/rolling/fedora --cost=99
 repo --name="nobara-updates" --baseurl=https://usw.nobaraproject.org/rolling/nobara-updates --cost=98
 repo --name="nobara-appstream" --baseurl=https://usw.nobaraproject.org/rolling/appstream
 repo --name="brave" --baseurl=https://brave-browser-rpm-release.s3.brave.com/$basearch
 repo --name="nobara-media" --baseurl=https://rpm.pika-os.com/nobara/media
 repo --name="nobara-rocm" --baseurl=https://use.nobaraproject.org/rolling/rocm/
-repo --name="terra" --metalink="https://tetsudou.fyralabs.com/metalink?repo=terra$releasever&arch=$basearch" --excludepkgs="akmod-xone,akmod-xpad-noone,gamescope,gamescope-session,gamescope-session-steam,flatpost,gpu-screen-recorder,gpu-screen-recorder-debuginfo,gpu-screen-recorder-debugsource,inputplumber,kmod-xone,kmod-xpad-noone,opengamepadui,powerstation,umu-launcher,umu-launcher-debuginfo,umu-launcher-debugsource,v4l2loopback,xone,xpad-noone,apparmor-debuginfo,apparmor-debugsource,apparmor-devel,apparmor-libs,apparmor-libs-debuginfo,apparmor-parser,apparmor-parser-debuginfo,apparmor-profiles,apparmor-utils,apparmor-utils-debuginfo,mod_apparmor,mod_apparmor-debuginfo,pam_apparmor,pam_apparmor-debuginfo,python3-apparmor,python3-LibAppArmor,python3-LibAppArmor-debuginfo,xone-firmware,powerbuttond"
+repo --name="terra" --metalink="https://tetsudou.fyralabs.com/metalink?repo=terra$releasever&arch=$basearch" --excludepkgs="akmod-xone,akmod-xpad-noone,gamescope,gamescope-session,gamescope-session-st[...]
+
 # Root password
 rootpw --iscrypted --lock locked
 # SELinux configuration
@@ -44,7 +50,7 @@ systemctl enable livesys.service
 systemctl enable livesys-late.service
 
 # add static hostname
-hostnamectl set-hostname "nobara-live"
+hostnamectl set-hostname "skryptos-pro-live"
 
 # enable tmpfs for /tmp
 systemctl enable tmp.mount
@@ -566,5 +572,9 @@ kdenlive
 obs-studio
 blender
 prismlauncher
+
+# SkryptOS-Pro Custom Packages
+skryptos-welcome
+skryptos-branding
 
 %end
