@@ -29,9 +29,15 @@ jobs:
         run: |
           mkdir -p ~/rpmbuild/SOURCES
           mkdir -p ~/rpmbuild/SPECS
+          
+          # Copy spec files
           cp rpm-sources/*.spec ~/rpmbuild/SPECS/ 2>/dev/null || true
+          
+          # Copy source tarballs if they exist
           cp rpm-sources/*.tar.gz ~/rpmbuild/SOURCES/ 2>/dev/null || true
           cp rpm-sources/*.tar.bz2 ~/rpmbuild/SOURCES/ 2>/dev/null || true
+          
+          # Build each spec file
           for spec in ~/rpmbuild/SPECS/*.spec; do
             if [ -f "$spec" ]; then
               echo "Building $(basename $spec)..."
@@ -43,27 +49,63 @@ jobs:
         run: |
           mkdir -p docs/repos/x86_64
           mkdir -p docs/repos/SRPMS
+          
+          # Copy built RPMs
           find ~/rpmbuild/RPMS/x86_64 -name "*.rpm" -exec cp {} docs/repos/x86_64/ \; 2>/dev/null || true
           find ~/rpmbuild/RPMS/noarch -name "*.rpm" -exec cp {} docs/repos/x86_64/ \; 2>/dev/null || true
           find ~/rpmbuild/SRPMS -name "*.src.rpm" -exec cp {} docs/repos/SRPMS/ \; 2>/dev/null || true
+          
+          # Generate repository metadata
           if [ "$(ls -A docs/repos/x86_64)" ]; then
             createrepo docs/repos/x86_64/
+            echo "x86_64 repository created"
+          else
+            echo "No x86_64 packages built"
           fi
+          
           if [ "$(ls -A docs/repos/SRPMS)" ]; then
             createrepo docs/repos/SRPMS/
+            echo "SRPMS repository created"
           fi
 
-      - name: Create .nojekyll and robots.txt
+      - name: Create .nojekyll to prevent Jekyll processing
         run: |
           touch docs/.nojekyll
           touch docs/repos/.nojekyll
+
+      - name: Create robots.txt (hide from search engines)
+        run: |
           cat > docs/robots.txt << 'EOF'
           User-agent: *
           Disallow: /repos
           EOF
+          
           cat > docs/repos/robots.txt << 'EOF'
           User-agent: *
           Disallow: /
+          EOF
+
+      - name: Create repo index page
+        run: |
+          cat > docs/repos/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>SkryptOS-Pro Repository</title>
+              <meta name="robots" content="noindex, nofollow">
+              <style>
+                  body { font-family: monospace; background: #0d1117; color: #c9d1d9; padding: 20px; }
+                  h1 { color: #58a6ff; }
+                  a { color: #79c0ff; }
+              </style>
+          </head>
+          <body>
+              <h1>SkryptOS-Pro RPM Repository</h1>
+              <p>This is a private repository for SkryptOS-Pro.</p>
+              <p>Repository URL: <code>https://SakuraSkrypt.github.io/SkryptOS-Pro/repos/x86_64/</code></p>
+              <p><a href="../">Back to SkryptOS-Pro</a></p>
+          </body>
+          </html>
           EOF
 
       - name: Setup Pages
@@ -75,4 +117,11 @@ jobs:
           path: 'docs'
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v2
+
+      - name: Print repository URL
+        run: |
+          echo "✓ Repository built successfully!"
+          echo "Repository URL: https://SakuraSkrypt.github.io/SkryptOS-Pro/repos/x86_64/"
+          echo "Use in kickstart: repo --name=\"skryptos-pro\" --baseurl=https://SakuraSkrypt.github.io/SkryptOS-Pro/repos/x86_64/"
