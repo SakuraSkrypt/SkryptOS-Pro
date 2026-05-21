@@ -1,0 +1,68 @@
+name: Build RPM Repository
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'rpm-sources/**'
+      - '.github/workflows/build-rpm-repo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: fedora-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo dnf install -y createrepo rpm-build fedora-packager rpmdevtools
+          rpmdev-setuptree
+
+      - name: Build RPMs
+        run: |
+          mkdir -p ~/rpmbuild/SOURCES
+          mkdir -p ~/rpmbuild/SPECS
+          # Copy your spec files
+          cp rpm-sources/*.spec ~/rpmbuild/SPECS/
+          # Build each package
+          for spec in rpm-sources/*.spec; do
+            rpmbuild -ba "$spec" || true
+          done
+
+      - name: Create repository
+        run: |
+          mkdir -p docs/repos/x86_64
+          # Copy all built RPMs
+          find ~/rpmbuild/RPMS -name "*.rpm" -exec cp {} docs/repos/x86_64/ \;
+          # Generate repository metadata
+          createrepo docs/repos/x86_64/
+
+      - name: Create .nojekyll to hide repo
+        run: |
+          touch docs/repos/.nojekyll
+
+      - name: Create robots.txt (optional hidden indicator)
+        run: |
+          cat > docs/repos/robots.txt << 'EOF'
+          User-agent: *
+          Disallow: /
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'docs'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
