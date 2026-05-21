@@ -29,27 +29,38 @@ jobs:
         run: |
           mkdir -p ~/rpmbuild/SOURCES
           mkdir -p ~/rpmbuild/SPECS
-          # Copy your spec files
-          cp rpm-sources/*.spec ~/rpmbuild/SPECS/
-          # Build each package
-          for spec in rpm-sources/*.spec; do
-            rpmbuild -ba "$spec" || true
+          cp rpm-sources/*.spec ~/rpmbuild/SPECS/ 2>/dev/null || true
+          cp rpm-sources/*.tar.gz ~/rpmbuild/SOURCES/ 2>/dev/null || true
+          cp rpm-sources/*.tar.bz2 ~/rpmbuild/SOURCES/ 2>/dev/null || true
+          for spec in ~/rpmbuild/SPECS/*.spec; do
+            if [ -f "$spec" ]; then
+              echo "Building $(basename $spec)..."
+              rpmbuild -ba "$spec" || echo "Warning: $(basename $spec) failed"
+            fi
           done
 
-      - name: Create repository
+      - name: Create repository structure
         run: |
           mkdir -p docs/repos/x86_64
-          # Copy all built RPMs
-          find ~/rpmbuild/RPMS -name "*.rpm" -exec cp {} docs/repos/x86_64/ \;
-          # Generate repository metadata
-          createrepo docs/repos/x86_64/
+          mkdir -p docs/repos/SRPMS
+          find ~/rpmbuild/RPMS/x86_64 -name "*.rpm" -exec cp {} docs/repos/x86_64/ \; 2>/dev/null || true
+          find ~/rpmbuild/RPMS/noarch -name "*.rpm" -exec cp {} docs/repos/x86_64/ \; 2>/dev/null || true
+          find ~/rpmbuild/SRPMS -name "*.src.rpm" -exec cp {} docs/repos/SRPMS/ \; 2>/dev/null || true
+          if [ "$(ls -A docs/repos/x86_64)" ]; then
+            createrepo docs/repos/x86_64/
+          fi
+          if [ "$(ls -A docs/repos/SRPMS)" ]; then
+            createrepo docs/repos/SRPMS/
+          fi
 
-      - name: Create .nojekyll to hide repo
+      - name: Create .nojekyll and robots.txt
         run: |
+          touch docs/.nojekyll
           touch docs/repos/.nojekyll
-
-      - name: Create robots.txt (optional hidden indicator)
-        run: |
+          cat > docs/robots.txt << 'EOF'
+          User-agent: *
+          Disallow: /repos
+          EOF
           cat > docs/repos/robots.txt << 'EOF'
           User-agent: *
           Disallow: /
@@ -64,5 +75,4 @@ jobs:
           path: 'docs'
 
       - name: Deploy to GitHub Pages
-        id: deployment
         uses: actions/deploy-pages@v2
