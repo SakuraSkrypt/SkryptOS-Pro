@@ -21,7 +21,7 @@ repo --name="nobara-appstream" --baseurl=https://usw.nobaraproject.org/rolling/a
 repo --name="brave" --baseurl=https://brave-browser-rpm-release.s3.brave.com/$basearch
 repo --name="nobara-media" --baseurl=https://rpm.pika-os.com/nobara/media
 repo --name="nobara-rocm" --baseurl=https://use.nobaraproject.org/rolling/rocm/
-repo --name="terra" --metalink="https://tetsudou.fyralabs.com/metalink?repo=terra$releasever&arch=$basearch" --excludepkgs="akmod-xone,akmod-xpad-noone,gamescope,gamescope-session,gamescope-session-st[...]
+repo --name="terra" --metalink="https://tetsudou.fyralabs.com/metalink?repo=terra$releasever&arch=$basearch" --excludepkgs="akmod-xone,akmod-xpad-noone,gamescope,gamescope-session,gamescope-session-steam,flatpost,gpu-screen-recorder,gpu-screen-recorder-debuginfo,gpu-screen-recorder-debugsource,inputplumber,kmod-xone,kmod-xpad-noone,opengamepadui,powerstation,umu-launcher,umu-launcher-debuginfo,umu-launcher-debugsource,v4l2loopback,xone,xpad-noone,apparmor-debuginfo,apparmor-debugsource,apparmor-devel,apparmor-libs,apparmor-libs-debuginfo,apparmor-parser,apparmor-parser-debuginfo,apparmor-profiles,apparmor-utils,apparmor-utils-debuginfo,mod_apparmor,mod_apparmor-debuginfo,pam_apparmor,pam_apparmor-debuginfo,python3-apparmor,python3-LibAppArmor,python3-LibAppArmor-debuginfo,xone-firmware,powerbuttond"
 
 # Root password
 rootpw --iscrypted --lock locked
