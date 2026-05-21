@@ -1,3 +1,10 @@
+# SkryptOS-Pro RPM Sources
+
+This directory contains RPM spec files and sources for building SkryptOS-Pro packages.
+
+## Repository Structure
+
+rpm-sources/ ├── *.spec # RPM spec files ├── *.tar.gz # Source tarballs (if needed) └── README.md # This file
 
 ## Building Locally
 
